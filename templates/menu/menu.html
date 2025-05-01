@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Menu{% endblock %}
+{% block content %}
+    <h2>Our Menu</h2>
+    {% if error %}
+        <div class="alert">{{ error }}</div>
+    {% endif %}
+    <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+        {% for product in products %}
+            <div class="card" style="width: 30%;">
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description }}</p>
+                    <p class="card-text">₹{{ product.price }}</p>
+                    <a href="{% url 'add_to_cart' product.id %}" class="btn">Add to Cart</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

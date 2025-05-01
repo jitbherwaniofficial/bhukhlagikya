@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}KFC Clone{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">BhukhLagiKya?</a>
+            <ul class="navbar-nav">
+                <li><a href="{% url 'menu' %}">Menu</a></li>
+                <li>
+                    <form method="post" action="{% url 'profile' %}">
+                        {% csrf_token %}
+                        <select name="store" onchange="$(this).closest('form').submit()">
+                            <option value="">Select Store</option>
+                            {% for store in stores %}
+                                <option value="{{ store.id }}" {% if store.id|stringformat:'s' == selected_store %}selected{% endif %}>
+                                    {{ store.name }} - {{ store.city }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                        <input type="hidden" name="latitude" id="nav-latitude">
+                        <input type="hidden" name="longitude" id="nav-longitude">
+                    </form>
+                </li>
+                <li><a href="{% url 'cart' %}">Cart</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'profile' %}">Profile</a></li>
+                {% else %}
+                    <li><a href="#" id="authModalTrigger">Login/Signup</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Authentication Modal -->
+    <div class="modal" id="authModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Login/Signup</h5>
+                    <button type="button" class="btn-close" id="closeModal">×</button>
+                </div>
+                <div class="modal-body">
+                    <div id="auth-form">
+                        <form id="authForm" method="post">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label class="form-label">Select Authentication Method</label>
+                                <select class="form-control" id="auth_type" name="auth_type">
+                                    <option value="phone">Phone Number</option>
+                                    <option value="email">Email</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="identifier" class="form-label">Enter Phone or Email</label>
+                                <input type="text" class="form-control" id="identifier" name="identifier" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="store" class="form-label">Select Store</label>
+                                <select class="form-control" id="store" name="store" required>
+                                    <option value="">Select a store</option>
+                                    {% for store in stores %}
+                                        <option value="{{ store.id }}">{{ store.name }} - {{ store.city }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <input type="hidden" id="latitude" name="latitude">
+                            <input type="hidden" id="longitude" name="longitude">
+                            <button type="submit" class="btn">Send OTP</button>
+                        </form>
+                        <div id="error-message" class="text-danger"></div>
+                    </div>
+                    <div id="otp-form" style="display: none;">
+                        <form id="otpForm" method="post" action="{% url 'verify_otp' %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="otp" class="form-label">Enter OTP</label>
+                                <input type="text" class="form-control" id="otp" name="otp" required>
+                            </div>
+                            <button type="submit" class="btn">Verify OTP</button>
+                        </form>
+                        <div id="otp-error-message" class="text-danger"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Get location on page load
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        $('#latitude, #nav-latitude').val(position.coords.latitude);
+                        $('#longitude, #nav-longitude').val(position.coords.longitude);
+                    },
+                    function(error) {
+                        alert('Unable to get location. Please allow location access.');
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+
+            // Update placeholder based on auth type
+            $('#auth_type').change(function() {
+                var authType = $(this).val();
+                $('#identifier').attr('placeholder', authType === 'phone' ? 'Enter Phone Number' : 'Enter Email');
+            });
+
+            // Show modal
+            $('#authModalTrigger').click(function(e) {
+                e.preventDefault();
+                $('#authModal').addClass('show');
+            });
+
+            // Close modal
+            $('#closeModal').click(function() {
+                $('#authModal').removeClass('show');
+            });
+
+            // Handle auth form submission
+            $('#authForm').submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "{% url 'auth' %}",
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.success) {
+                            $('#auth-form').hide();
+                            $('#otp-form').show();
+                        } else {
+                            $('#error-message').text(data.error);
+                        }
+                    },
+                    error: function() {
+                        $('#error-message').text('An error occurred. Please try again.');
+                    }
+                });
+            });
+
+            // Handle OTP form submission
+            $('#otpForm').submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: "{% url 'verify_otp' %}",
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.success) {
+                            window.location.href = "{% url 'home' %}";
+                        } else {
+                            $('#otp-error-message').text(data.error);
+                        }
+                    },
+                    error: function() {
+                        $('#otp-error-message').text('An error occurred. Please try again.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

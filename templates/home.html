@@ -1,0 +1,8 @@
+<!-- templates/home.html -->
+{% extends 'base.html' %}
+{% block title %}BhukhLagiKya?{% endblock %}
+{% block content %}
+    <h1>Welcome to Bhukh Lagi Kya?</h1>
+    <p>Order delicious Fried dishes online! Delivery within 30 minutes.</p>
+    <a href="{% url 'menu' %}" class="btn">View Menu</a>
+{% endblock %}

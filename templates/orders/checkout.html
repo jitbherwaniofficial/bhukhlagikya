@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+    <h2>Checkout</h2>
+    {% if error %}
+        <div class="alert">{{ error }}</div>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <p>Your live location will be used for delivery.</p>
+            <input type="hidden" id="latitude" name="latitude">
+            <input type="hidden" id="longitude" name="longitude">
+        </div>
+        <h4>Total: ₹{{ total_price }}</h4>
+        <button type="button" id="rzp-button" class="btn">Pay Now</button>
+    </form>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        $(document).ready(function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        $('#latitude').val(position.coords.latitude);
+                        $('#longitude').val(position.coords.longitude);
+                    },
+                    function(error) {
+                        alert('Unable to get location. Please allow location access.');
+                    }
+                );
+            }
+
+            var options = {
+                "key": "{{ razorpay_key }}",
+                "amount": {{ total_price|floatformat:2 }} * 100,
+                "currency": "INR",
+                "order_id": "{{ razorpay_order_id }}",
+                "handler": function(response) {
+                    $('form').submit();
+                }
+            };
+            var rzp = new Razorpay(options);
+            $('#rzp-button').click(function(e) {
+                e.preventDefault();
+                rzp.open();
+            });
+        });
+    </script>
+{% endblock %}

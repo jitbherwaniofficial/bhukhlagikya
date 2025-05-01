@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Order Success{% endblock %}
+{% block content %}
+    <h2>Order Placed Successfully!</h2>
+    <p>Order ID: {{ order.id }}</p>
+    <p>Total: ₹{{ order.total_price }}</p>
+    <p>Estimated Delivery: {{ order.estimated_delivery_time|date:"H:i" }}</p>
+    <a href="{% url 'order_tracking' order.id %}" class="btn">Track Order</a>
+{% endblock %}

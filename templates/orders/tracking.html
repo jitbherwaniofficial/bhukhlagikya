@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Order Tracking{% endblock %}
+{% block content %}
+    <h2>Order Tracking</h2>
+    <p>Order ID: {{ order.id }}</p>
+    <p>Status: {{ order.get_status_display }}</p>
+    <p>Total: ₹{{ order.total_price }}</p>
+    <p>Estimated Delivery: {{ order.estimated_delivery_time|date:"H:i" }}</p>
+    {% if show_delivery_boy %}
+        <p>Delivery Boy: {{ order.delivery_boy.name }}</p>
+        <p>Contact: <a href="tel:{{ order.delivery_boy.phone }}">{{ order.delivery_boy.phone }}</a></p>
+    {% endif %}
+{% endblock %}

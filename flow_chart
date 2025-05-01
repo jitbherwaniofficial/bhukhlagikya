@@ -1,0 +1,51 @@
+Bhukhlagikya/
+├── accounts/
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── models.py
+│   ├── tasks.py
+│   ├── urls.py
+│   └── views.py
+├── menu/
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+├── orders/
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+├── stores/
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── context_processors.py
+│   ├── models.py
+│   └── urls.py
+├── static/
+│   └── css/
+│       └── styles.css
+├── templates/
+│   ├── base.html
+│   ├── home.html
+│   ├── accounts/
+│   │   └── profile.html
+│   ├── menu/
+│   │   ├── menu.html
+│   │   └── cart.html
+│   └── orders/
+│       ├── checkout.html
+│       ├── success.html
+│       └── tracking.html
+├── Bhukhlagikya/
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   ├── wsgi.py
+│   └── celery.py
+├── Dockerfile
+├── nginx.conf
+├── requirements.txt
+└── manage.py
